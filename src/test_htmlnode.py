@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TextHTMLNode(unittest.TestCase):
@@ -49,6 +49,35 @@ class TextHTMLNode(unittest.TestCase):
     def test_leaf_to_html_no_tag(self):
         node = LeafNode(None, "Hello, world!")
         self.assertEqual(node.to_html(), "Hello, world!")
+
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+
+    def test_to_html_with_nested_parents(self):
+        grandchild_node_1 = LeafNode("b", "grandchild1")
+        grandchild_node_2 = LeafNode("i", "grandchild2")
+        child_node = ParentNode("span", [grandchild_node_1, grandchild_node_2])
+        parent_node = ParentNode("div", [child_node])
+        grand_parent_node = ParentNode("section", [parent_node])
+        self.assertEqual(grand_parent_node.to_html(), "<section><div><span><b>grandchild1</b><i>grandchild2</i></span"
+                                                      "></div></section>")
+
+    def test_to_html_with_multiple_children(self):
+        child_node_1 = LeafNode("span", "child1")
+        child_node_2 = LeafNode("span", "child2")
+        parent_node = ParentNode("div", [child_node_1, child_node_2])
+        self.assertEqual(parent_node.to_html(), "<div><span>child1</span><span>child2</span></div>")
 
 
 if __name__ == '__main__':
